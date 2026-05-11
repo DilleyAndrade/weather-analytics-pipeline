@@ -390,7 +390,7 @@ Pontos principais para avaliação:
 
 ## Como validar rapidamente
 
-Após configurar o ambiente, o avaliador pode executar:
+Após configurar o ambiente, executar:
 
 ```bash
 docker compose up -d
