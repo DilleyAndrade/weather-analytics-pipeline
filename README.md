@@ -346,6 +346,57 @@ Funcionalidades já implementadas:
 - Filtros e gráficos
 - Documentação técnica inicial
 
+## Evidências Visuais
+
+### Dashboard Principal
+
+![Dashboard principal](docs/images/dashboard-overview.png)
+
+### Filtros e Dados Diários
+
+![Filtros do dashboard](docs/images/dashboard-filters.png)
+
+### Documentação da API
+
+![Documentação FastAPI](docs/images/api-docs.png)
+
+### Health Check da API
+
+![Health check da API](docs/images/api-health.png)
+
+## O que observar neste projeto
+
+Este projeto foi desenvolvido para demonstrar uma solução completa de engenharia de dados, cobrindo desde ingestão até visualização.
+
+Pontos principais para avaliação:
+
+- Pipeline Python parametrizável por data
+- Consumo de API externa histórica
+- Tratamento de erros por cidade
+- Logs estruturados
+- Validação da resposta da API
+- Modelagem dimensional com tabela fato e dimensões
+- Carga idempotente usando `ON CONFLICT`
+- PostgreSQL executado via Docker
+- Views analíticas para consumo pelo backend
+- API FastAPI com validação de parâmetros
+- Documentação automática em `/docs`
+- Dashboard React próprio, sem uso de ferramentas prontas de BI
+- Filtros interativos por cidade, período e variável climática
+- Gráficos com Recharts
+- Documentação técnica em Markdown
+- Histórico de commits organizado com Conventional Commits
+- Release versionada com tag `v1.0.0`
+
+## Como validar rapidamente
+
+Após configurar o ambiente, o avaliador pode executar:
+
+```bash
+docker compose up -d
+python -m ingestion.main --start-date 2025-01-01 --end-date 2025-01-07
+uvicorn backend.main:app --reload
+
 ## Autor
 
 Dilley Andrade
