@@ -1,15 +1,55 @@
 import pandas as pd
 
 
-def transform_daily_weather_response(weather_data: dict, location_id: int) -> pd.DataFrame:
+REQUIRED_DAILY_FIELDS = [
+    "time",
+    "temperature_2m_max",
+    "temperature_2m_min",
+    "temperature_2m_mean",
+    "precipitation_sum",
+    "wind_speed_10m_max",
+]
+
+
+def validate_daily_weather_data(daily_data: dict) -> None:
+    if not daily_data:
+        raise ValueError("Weather response does not contain daily data.")
+
+    missing_fields = [
+        field for field in REQUIRED_DAILY_FIELDS if field not in daily_data
+    ]
+
+    if missing_fields:
+        raise ValueError(
+            f"Weather response is missing required daily fields: {missing_fields}"
+        )
+
+    field_lengths = {
+        field: len(daily_data[field]) for field in REQUIRED_DAILY_FIELDS
+    }
+
+    unique_lengths = set(field_lengths.values())
+
+    if len(unique_lengths) != 1:
+        raise ValueError(
+            f"Weather daily fields have inconsistent lengths: {field_lengths}"
+        )
+
+
+def transform_daily_weather_response(
+    weather_data: dict,
+    location_id: int,
+) -> pd.DataFrame:
     daily_data = weather_data.get("daily", {})
 
-    dates = daily_data.get("time", [])
-    temperature_max = daily_data.get("temperature_2m_max", [])
-    temperature_min = daily_data.get("temperature_2m_min", [])
-    temperature_mean = daily_data.get("temperature_2m_mean", [])
-    precipitation_sum = daily_data.get("precipitation_sum", [])
-    wind_speed_max = daily_data.get("wind_speed_10m_max", [])
+    validate_daily_weather_data(daily_data)
+
+    dates = daily_data["time"]
+    temperature_max = daily_data["temperature_2m_max"]
+    temperature_min = daily_data["temperature_2m_min"]
+    temperature_mean = daily_data["temperature_2m_mean"]
+    precipitation_sum = daily_data["precipitation_sum"]
+    wind_speed_max = daily_data["wind_speed_10m_max"]
 
     records = []
 
