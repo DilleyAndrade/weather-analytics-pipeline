@@ -1,7 +1,10 @@
 from ingestion.api.open_meteo_client import fetch_daily_weather
+from ingestion.transform.weather_transformer import transform_daily_weather_response
 
 
 def main() -> None:
+    location_id = 1
+
     weather_data = fetch_daily_weather(
         latitude=-8.047600,
         longitude=-34.877000,
@@ -10,16 +13,16 @@ def main() -> None:
         timezone="America/Recife",
     )
 
-    daily_data = weather_data.get("daily", {})
+    weather_df = transform_daily_weather_response(
+        weather_data=weather_data,
+        location_id=location_id,
+    )
 
-    print("Weather data fetched successfully.")
-    print("Dates:", daily_data.get("time"))
-    print("Max temperatures:", daily_data.get("temperature_2m_max"))
-    print("Min temperatures:", daily_data.get("temperature_2m_min"))
-    print("Mean temperatures:", daily_data.get("temperature_2m_mean"))
-    print("Precipitation:", daily_data.get("precipitation_sum"))
-    print("Max wind speed:", daily_data.get("wind_speed_10m_max"))
+    print("Weather data transformed successfully.")
+    print(weather_df.head())
+    print(weather_df.dtypes)
 
 
 if __name__ == "__main__":
     main()
+    
