@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 
+from backend.database import test_database_connection
+
 
 app = FastAPI(
     title="Weather Analytics API",
@@ -17,6 +19,9 @@ def root() -> dict:
 
 @app.get("/health")
 def health_check() -> dict:
+    database_connected = test_database_connection()
+
     return {
-        "status": "healthy"
+        "status": "healthy",
+        "database_connected": database_connected,
     }
