@@ -9,6 +9,7 @@ function DashboardFilters({
   onStartDateChange,
   onEndDateChange,
   onApplyFilters,
+  onClearFilters,
 }) {
   return (
     <section className="filters-section">
@@ -63,9 +64,19 @@ function DashboardFilters({
           />
         </label>
 
-        <button type="button" onClick={onApplyFilters}>
-          Aplicar filtros
-        </button>
+        <div className="filter-actions">
+          <button type="button" onClick={onApplyFilters}>
+            Aplicar filtros
+          </button>
+
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={onClearFilters}
+          >
+            Limpar
+          </button>
+        </div>
       </div>
     </section>
   )

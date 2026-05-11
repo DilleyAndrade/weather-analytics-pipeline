@@ -51,6 +51,30 @@ function App() {
     }
   }
 
+  async function clearFilters() {
+    setSelectedLocationId('')
+    setSelectedMetric('temperature_mean_celsius')
+    setStartDate('2025-01-01')
+    setEndDate('2025-01-07')
+
+    try {
+      setIsDailyLoading(true)
+
+      const data = await getDailyWeather({
+        start_date: '2025-01-01',
+        end_date: '2025-01-07',
+        limit: 1000,
+      })
+
+      setDailyWeather(data)
+    } catch (error) {
+      console.error(error)
+      setErrorMessage('Não foi possível limpar os filtros.')
+    } finally {
+      setIsDailyLoading(false)
+    }
+  }
+
   useEffect(() => {
     async function fetchDashboardData() {
       try {
@@ -204,6 +228,7 @@ function App() {
         onStartDateChange={setStartDate}
         onEndDateChange={setEndDate}
         onApplyFilters={fetchDailyWeather}
+        onClearFilters={clearFilters}
       />
 
       <section className="placeholder-section">
