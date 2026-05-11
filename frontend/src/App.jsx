@@ -25,6 +25,8 @@ function App() {
   const [isDailyLoading, setIsDailyLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
+  const [selectedMetric, setSelectedMetric] = useState('temperature_mean_celsius')
+
   async function fetchDailyWeather() {
     try {
       setIsDailyLoading(true)
@@ -137,9 +139,11 @@ function App() {
       <DashboardFilters
         locations={locations}
         selectedLocationId={selectedLocationId}
+        selectedMetric={selectedMetric}
         startDate={startDate}
         endDate={endDate}
         onLocationChange={setSelectedLocationId}
+        onMetricChange={setSelectedMetric}
         onStartDateChange={setStartDate}
         onEndDateChange={setEndDate}
         onApplyFilters={fetchDailyWeather}
@@ -160,8 +164,8 @@ function App() {
 
       <section className="placeholder-section">
         <div className="section-header">
-          <h2>Evolução diária da temperatura</h2>
-          <p>Selecione uma cidade para visualizar a evolução diária da temperatura média.</p>
+          <h2>Evolução diária da variável climática</h2>
+          <p>Selecione uma cidade e uma variável para visualizar a evolução diária.</p>
         </div>
 
         {!selectedLocationId ? (
@@ -171,7 +175,10 @@ function App() {
         ) : isDailyLoading ? (
           <p className="empty-state">Carregando gráfico diário...</p>
         ) : (
-          <DailyTemperatureLineChart data={dailyWeather} />
+          <DailyTemperatureLineChart
+            data={dailyWeather}
+            metric={selectedMetric}
+          />
         )}
       </section>
 

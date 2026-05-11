@@ -1,9 +1,11 @@
 function DashboardFilters({
   locations,
   selectedLocationId,
+  selectedMetric,
   startDate,
   endDate,
   onLocationChange,
+  onMetricChange,
   onStartDateChange,
   onEndDateChange,
   onApplyFilters,
@@ -12,7 +14,7 @@ function DashboardFilters({
     <section className="filters-section">
       <div className="section-header">
         <h2>Filtros</h2>
-        <p>Selecione uma cidade e um período para analisar os dados diários.</p>
+        <p>Selecione uma cidade, variável climática e período para análise.</p>
       </div>
 
       <div className="filters-grid">
@@ -28,6 +30,18 @@ function DashboardFilters({
                 {location.city}
               </option>
             ))}
+          </select>
+        </label>
+
+        <label>
+          Variável
+          <select
+            value={selectedMetric}
+            onChange={(event) => onMetricChange(event.target.value)}
+          >
+            <option value="temperature_mean_celsius">Temperatura média</option>
+            <option value="precipitation_sum_mm">Precipitação</option>
+            <option value="wind_speed_max_kmh">Vento máximo</option>
           </select>
         </label>
 
