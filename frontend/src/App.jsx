@@ -1,27 +1,75 @@
 import { useEffect, useState } from 'react'
 import './App.css'
+import DailyWeatherTable from './components/DailyWeatherTable'
+import DashboardFilters from './components/DashboardFilters'
 import TemperatureComparisonChart from './components/TemperatureComparisonChart'
-import { getWeatherComparison, getWeatherSummary } from './services/api'
+import {
+  getDailyWeather,
+  getWeatherComparison,
+  getWeatherLocations,
+  getWeatherSummary,
+} from './services/api'
 
 function App() {
   const [summary, setSummary] = useState([])
   const [comparison, setComparison] = useState([])
+  const [locations, setLocations] = useState([])
+  const [dailyWeather, setDailyWeather] = useState([])
+
+  const [selectedLocationId, setSelectedLocationId] = useState('')
+  const [startDate, setStartDate] = useState('2025-01-01')
+  const [endDate, setEndDate] = useState('2025-01-07')
+
   const [isLoading, setIsLoading] = useState(true)
+  const [isDailyLoading, setIsDailyLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+
+  async function fetchDailyWeather() {
+    try {
+      setIsDailyLoading(true)
+
+      const params = {
+        start_date: startDate,
+        end_date: endDate,
+        limit: 1000,
+      }
+
+      if (selectedLocationId) {
+        params.location_id = selectedLocationId
+      }
+
+      const data = await getDailyWeather(params)
+      setDailyWeather(data)
+    } catch (error) {
+      console.error(error)
+      setErrorMessage('Não foi possível carregar os dados diários.')
+    } finally {
+      setIsDailyLoading(false)
+    }
+  }
 
   useEffect(() => {
     async function fetchDashboardData() {
       try {
-        const [summaryData, comparisonData] = await Promise.all([
-          getWeatherSummary(),
-          getWeatherComparison({
-            year: 2025,
-            month: 1,
-          }),
-        ])
+        const [summaryData, comparisonData, locationsData, dailyData] =
+          await Promise.all([
+            getWeatherSummary(),
+            getWeatherComparison({
+              year: 2025,
+              month: 1,
+            }),
+            getWeatherLocations(),
+            getDailyWeather({
+              start_date: startDate,
+              end_date: endDate,
+              limit: 1000,
+            }),
+          ])
 
         setSummary(summaryData)
         setComparison(comparisonData)
+        setLocations(locationsData)
+        setDailyWeather(dailyData)
       } catch (error) {
         console.error(error)
         setErrorMessage('Não foi possível carregar os dados da API.')
@@ -85,6 +133,17 @@ function App() {
         </article>
       </section>
 
+      <DashboardFilters
+        locations={locations}
+        selectedLocationId={selectedLocationId}
+        startDate={startDate}
+        endDate={endDate}
+        onLocationChange={setSelectedLocationId}
+        onStartDateChange={setStartDate}
+        onEndDateChange={setEndDate}
+        onApplyFilters={fetchDailyWeather}
+      />
+
       <section className="placeholder-section">
         <div className="section-header">
           <h2>Temperatura média por cidade</h2>
@@ -95,6 +154,19 @@ function App() {
           <p className="empty-state">Carregando gráfico...</p>
         ) : (
           <TemperatureComparisonChart data={comparison} />
+        )}
+      </section>
+
+      <section className="placeholder-section">
+        <div className="section-header">
+          <h2>Dados diários filtrados</h2>
+          <p>Dados retornados pela API conforme filtros selecionados.</p>
+        </div>
+
+        {isDailyLoading ? (
+          <p className="empty-state">Carregando dados diários...</p>
+        ) : (
+          <DailyWeatherTable data={dailyWeather} />
         )}
       </section>
 

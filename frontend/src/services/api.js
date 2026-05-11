@@ -17,4 +17,17 @@ export async function getWeatherComparison(params = {}) {
   return response.data
 }
 
+export async function getWeatherLocations() {
+  const response = await api.get('/weather/locations')
+  return response.data
+}
+
+export async function getDailyWeather(params = {}) {
+  const response = await api.get('/weather/daily', {
+    params,
+  })
+
+  return response.data
+}
+
 export default api
