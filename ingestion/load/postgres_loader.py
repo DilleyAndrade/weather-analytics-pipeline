@@ -109,4 +109,26 @@ def load_fact_weather_daily(weather_df: pd.DataFrame) -> None:
 def load_weather_data(weather_df: pd.DataFrame) -> None:
     load_dim_date(weather_df)
     load_fact_weather_daily(weather_df)
+
+
+def get_locations() -> pd.DataFrame:
+    engine = get_database_engine()
+
+    query = text(
+        """
+        SELECT
+            location_id,
+            city,
+            state,
+            country,
+            latitude,
+            longitude,
+            timezone
+        FROM dim_location
+        ORDER BY location_id;
+        """
+    )
+
+    with engine.connect() as connection:
+        return pd.read_sql(query, connection)
     
