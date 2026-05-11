@@ -96,6 +96,31 @@ function App() {
     return highest
   }, 0)
 
+  const filteredRecords = dailyWeather.length
+
+  const filteredAverageTemperature =
+    dailyWeather.length > 0
+      ? dailyWeather.reduce(
+          (acc, item) => acc + Number(item.temperature_mean_celsius),
+          0,
+        ) / dailyWeather.length
+      : 0
+
+  const filteredTotalPrecipitation = dailyWeather.reduce(
+    (acc, item) => acc + Number(item.precipitation_sum_mm),
+    0,
+  )
+
+  const filteredMaxWindSpeed = dailyWeather.reduce((maxWind, item) => {
+    const currentWindSpeed = Number(item.wind_speed_max_kmh)
+
+    if (currentWindSpeed > maxWind) {
+      return currentWindSpeed
+    }
+
+    return maxWind
+  }, 0)
+
   return (
     <main className="app">
       <section className="hero">
@@ -133,6 +158,38 @@ function App() {
             {isLoading ? '...' : `${highestAverageTemperature.toFixed(1)}°C`}
           </strong>
           <p>Maior média de temperatura entre as cidades.</p>
+        </article>
+      </section>
+
+      <section className="dashboard-grid compact-grid">
+        <article className="card">
+          <span className="card-label">Registros filtrados</span>
+          <strong>{isDailyLoading ? '...' : filteredRecords}</strong>
+          <p>Total de linhas retornadas pelos filtros aplicados.</p>
+        </article>
+
+        <article className="card">
+          <span className="card-label">Temperatura média filtrada</span>
+          <strong>
+            {isDailyLoading ? '...' : `${filteredAverageTemperature.toFixed(1)}°C`}
+          </strong>
+          <p>Média de temperatura no recorte selecionado.</p>
+        </article>
+
+        <article className="card">
+          <span className="card-label">Chuva total filtrada</span>
+          <strong>
+            {isDailyLoading ? '...' : `${filteredTotalPrecipitation.toFixed(1)} mm`}
+          </strong>
+          <p>Soma de precipitação no período filtrado.</p>
+        </article>
+
+        <article className="card">
+          <span className="card-label">Maior vento filtrado</span>
+          <strong>
+            {isDailyLoading ? '...' : `${filteredMaxWindSpeed.toFixed(1)} km/h`}
+          </strong>
+          <p>Maior velocidade máxima de vento no recorte.</p>
         </article>
       </section>
 
