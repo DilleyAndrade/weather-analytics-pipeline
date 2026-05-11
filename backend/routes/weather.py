@@ -113,3 +113,51 @@ def get_weather_summary() -> list[dict]:
     with engine.connect() as connection:
         result = connection.execute(query)
         return [dict(row._mapping) for row in result]
+
+
+@router.get("/comparison")
+def get_weather_comparison(
+    year: int | None = Query(default=None),
+    month: int | None = Query(default=None),
+) -> list[dict]:
+    engine = get_database_engine()
+
+    conditions = []
+    params = {}
+
+    if year is not None:
+        conditions.append("year = :year")
+        params["year"] = year
+
+    if month is not None:
+        conditions.append("month = :month")
+        params["month"] = month
+
+    where_clause = ""
+    if conditions:
+        where_clause = "WHERE " + " AND ".join(conditions)
+
+    query = text(
+        f"""
+        SELECT
+            location_id,
+            city,
+            state,
+            year,
+            month,
+            month_name,
+            total_days,
+            avg_temperature_mean_celsius,
+            max_temperature_celsius,
+            min_temperature_celsius,
+            total_precipitation_mm,
+            avg_wind_speed_max_kmh
+        FROM vw_weather_comparison_by_period
+        {where_clause}
+        ORDER BY year, month, city;
+        """
+    )
+
+    with engine.connect() as connection:
+        result = connection.execute(query, params)
+        return [dict(row._mapping) for row in result]
