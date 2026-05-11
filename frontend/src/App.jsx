@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
 import './App.css'
+import CitySummaryTable from './components/CitySummaryTable'
 import DailyTemperatureLineChart from './components/DailyTemperatureLineChart'
 import DailyWeatherTable from './components/DailyWeatherTable'
 import DashboardFilters from './components/DashboardFilters'
+import FilteredSummaryCards from './components/FilteredSummaryCards'
+import MainSummaryCards from './components/MainSummaryCards'
 import TemperatureComparisonChart from './components/TemperatureComparisonChart'
 import {
   getDailyWeather,
@@ -18,14 +21,13 @@ function App() {
   const [dailyWeather, setDailyWeather] = useState([])
 
   const [selectedLocationId, setSelectedLocationId] = useState('')
+  const [selectedMetric, setSelectedMetric] = useState('temperature_mean_celsius')
   const [startDate, setStartDate] = useState('2025-01-01')
   const [endDate, setEndDate] = useState('2025-01-07')
 
   const [isLoading, setIsLoading] = useState(true)
   const [isDailyLoading, setIsDailyLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
-
-  const [selectedMetric, setSelectedMetric] = useState('temperature_mean_celsius')
 
   async function fetchDailyWeather() {
     try {
@@ -109,7 +111,12 @@ function App() {
   }, [])
 
   const totalCities = summary.length
-  const totalDays = summary.reduce((acc, item) => acc + Number(item.total_days), 0)
+
+  const totalDays = summary.reduce(
+    (acc, item) => acc + Number(item.total_days),
+    0,
+  )
+
   const highestAverageTemperature = summary.reduce((highest, item) => {
     const currentTemperature = Number(item.avg_temperature_mean_celsius)
 
@@ -163,59 +170,20 @@ function App() {
         </section>
       )}
 
-      <section className="dashboard-grid">
-        <article className="card">
-          <span className="card-label">Cidades monitoradas</span>
-          <strong>{isLoading ? '...' : totalCities}</strong>
-          <p>Regiões brasileiras disponíveis para análise.</p>
-        </article>
+      <MainSummaryCards
+        isLoading={isLoading}
+        totalCities={totalCities}
+        totalDays={totalDays}
+        highestAverageTemperature={highestAverageTemperature}
+      />
 
-        <article className="card">
-          <span className="card-label">Registros analisados</span>
-          <strong>{isLoading ? '...' : totalDays}</strong>
-          <p>Dias carregados no banco a partir da Open-Meteo.</p>
-        </article>
-
-        <article className="card">
-          <span className="card-label">Maior temperatura média</span>
-          <strong>
-            {isLoading ? '...' : `${highestAverageTemperature.toFixed(1)}°C`}
-          </strong>
-          <p>Maior média de temperatura entre as cidades.</p>
-        </article>
-      </section>
-
-      <section className="dashboard-grid compact-grid">
-        <article className="card">
-          <span className="card-label">Registros filtrados</span>
-          <strong>{isDailyLoading ? '...' : filteredRecords}</strong>
-          <p>Total de linhas retornadas pelos filtros aplicados.</p>
-        </article>
-
-        <article className="card">
-          <span className="card-label">Temperatura média filtrada</span>
-          <strong>
-            {isDailyLoading ? '...' : `${filteredAverageTemperature.toFixed(1)}°C`}
-          </strong>
-          <p>Média de temperatura no recorte selecionado.</p>
-        </article>
-
-        <article className="card">
-          <span className="card-label">Chuva total filtrada</span>
-          <strong>
-            {isDailyLoading ? '...' : `${filteredTotalPrecipitation.toFixed(1)} mm`}
-          </strong>
-          <p>Soma de precipitação no período filtrado.</p>
-        </article>
-
-        <article className="card">
-          <span className="card-label">Maior vento filtrado</span>
-          <strong>
-            {isDailyLoading ? '...' : `${filteredMaxWindSpeed.toFixed(1)} km/h`}
-          </strong>
-          <p>Maior velocidade máxima de vento no recorte.</p>
-        </article>
-      </section>
+      <FilteredSummaryCards
+        isLoading={isDailyLoading}
+        filteredRecords={filteredRecords}
+        filteredAverageTemperature={filteredAverageTemperature}
+        filteredTotalPrecipitation={filteredTotalPrecipitation}
+        filteredMaxWindSpeed={filteredMaxWindSpeed}
+      />
 
       <DashboardFilters
         locations={locations}
@@ -277,41 +245,11 @@ function App() {
         )}
       </section>
 
-      <section className="placeholder-section">
-        <div className="section-header">
-          <h2>Resumo por cidade</h2>
-          <p>Dados agregados consumidos diretamente da API FastAPI.</p>
-        </div>
-
-        <div className="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>Cidade</th>
-                <th>Dias</th>
-                <th>Temp. média</th>
-                <th>Chuva total</th>
-                <th>Vento médio</th>
-              </tr>
-            </thead>
-            <tbody>
-              {summary.map((item) => (
-                <tr key={item.location_id}>
-                  <td>{item.city}</td>
-                  <td>{item.total_days}</td>
-                  <td>{Number(item.avg_temperature_mean_celsius).toFixed(1)}°C</td>
-                  <td>{Number(item.total_precipitation_mm).toFixed(1)} mm</td>
-                  <td>{Number(item.avg_wind_speed_max_kmh).toFixed(1)} km/h</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {!isLoading && summary.length === 0 && !errorMessage && (
-            <p className="empty-state">Nenhum dado encontrado.</p>
-          )}
-        </div>
-      </section>
+      <CitySummaryTable
+        summary={summary}
+        isLoading={isLoading}
+        errorMessage={errorMessage}
+      />
     </main>
   )
 }
