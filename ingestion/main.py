@@ -1,13 +1,31 @@
+import argparse
+
 from ingestion.api.open_meteo_client import fetch_daily_weather
 from ingestion.load.postgres_loader import get_locations, load_weather_data
 from ingestion.transform.weather_transformer import transform_daily_weather_response
 
 
-START_DATE = "2025-01-01"
-END_DATE = "2025-01-07"
+def parse_arguments() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Run weather data ingestion pipeline."
+    )
+
+    parser.add_argument(
+        "--start-date",
+        required=True,
+        help="Start date for weather data extraction in YYYY-MM-DD format.",
+    )
+
+    parser.add_argument(
+        "--end-date",
+        required=True,
+        help="End date for weather data extraction in YYYY-MM-DD format.",
+    )
+
+    return parser.parse_args()
 
 
-def main() -> None:
+def run_pipeline(start_date: str, end_date: str) -> None:
     locations_df = get_locations()
 
     total_rows_loaded = 0
@@ -18,8 +36,8 @@ def main() -> None:
         weather_data = fetch_daily_weather(
             latitude=float(location["latitude"]),
             longitude=float(location["longitude"]),
-            start_date=START_DATE,
-            end_date=END_DATE,
+            start_date=start_date,
+            end_date=end_date,
             timezone=location["timezone"],
         )
 
@@ -37,6 +55,15 @@ def main() -> None:
 
     print("Weather pipeline finished successfully.")
     print(f"Total rows loaded: {total_rows_loaded}")
+
+
+def main() -> None:
+    args = parse_arguments()
+
+    run_pipeline(
+        start_date=args.start_date,
+        end_date=args.end_date,
+    )
 
 
 if __name__ == "__main__":
