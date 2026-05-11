@@ -1,4 +1,5 @@
 from ingestion.api.open_meteo_client import fetch_daily_weather
+from ingestion.load.postgres_loader import load_weather_data
 from ingestion.transform.weather_transformer import transform_daily_weather_response
 
 
@@ -18,11 +19,11 @@ def main() -> None:
         location_id=location_id,
     )
 
-    print("Weather data transformed successfully.")
-    print(weather_df.head())
-    print(weather_df.dtypes)
+    load_weather_data(weather_df)
+
+    print("Weather data loaded successfully.")
+    print(f"Rows loaded: {len(weather_df)}")
 
 
 if __name__ == "__main__":
     main()
-    
