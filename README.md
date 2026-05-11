@@ -22,4 +22,4 @@ Open-Meteo API → Python Ingestion → PostgreSQL → FastAPI Backend → React
 
 ## Status
 
-Projeto em desenvolvimento.
+Projeto em desenvolvimento.# weather-analytics-pipeline
