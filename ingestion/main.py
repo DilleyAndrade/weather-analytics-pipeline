@@ -55,32 +55,49 @@ def run_pipeline(start_date: str, end_date: str) -> None:
     locations_df = get_locations()
 
     total_rows_loaded = 0
+    successful_locations = 0
+    failed_locations = 0
 
     for _, location in locations_df.iterrows():
-        logger.info("Fetching weather data for %s.", location["city"])
+        city = location["city"]
 
-        weather_data = fetch_daily_weather(
-            latitude=float(location["latitude"]),
-            longitude=float(location["longitude"]),
-            start_date=start_date,
-            end_date=end_date,
-            timezone=location["timezone"],
-        )
+        try:
+            logger.info("Fetching weather data for %s.", city)
 
-        weather_df = transform_daily_weather_response(
-            weather_data=weather_data,
-            location_id=int(location["location_id"]),
-        )
+            weather_data = fetch_daily_weather(
+                latitude=float(location["latitude"]),
+                longitude=float(location["longitude"]),
+                start_date=start_date,
+                end_date=end_date,
+                timezone=location["timezone"],
+            )
 
-        load_weather_data(weather_df)
+            weather_df = transform_daily_weather_response(
+                weather_data=weather_data,
+                location_id=int(location["location_id"]),
+            )
 
-        rows_loaded = len(weather_df)
-        total_rows_loaded += rows_loaded
+            load_weather_data(weather_df)
 
-        logger.info("Loaded %s rows for %s.", rows_loaded, location["city"])
+            rows_loaded = len(weather_df)
+            total_rows_loaded += rows_loaded
+            successful_locations += 1
 
-    logger.info("Weather pipeline finished successfully.")
+            logger.info("Loaded %s rows for %s.", rows_loaded, city)
+
+        except Exception:
+            failed_locations += 1
+            logger.exception("Failed to process weather data for %s.", city)
+
+    logger.info("Weather pipeline finished.")
+    logger.info("Successful locations: %s", successful_locations)
+    logger.info("Failed locations: %s", failed_locations)
     logger.info("Total rows loaded: %s", total_rows_loaded)
+
+    if failed_locations > 0:
+        raise RuntimeError(
+            f"Weather pipeline finished with {failed_locations} failed location(s)."
+        )
 
 
 def main() -> None:
@@ -94,4 +111,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-    
