@@ -132,3 +132,56 @@ h1 {
     grid-template-columns: 1fr;
   }
 }
+
+.alert {
+  margin-top: 24px;
+  border: 1px solid #fecaca;
+  border-radius: 18px;
+  background: #fff1f2;
+  color: #991b1b;
+  padding: 16px 20px;
+  font-weight: 600;
+}
+
+.table-wrapper {
+  margin-top: 28px;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  border-radius: 18px;
+}
+
+th,
+td {
+  padding: 18px;
+  border-bottom: 1px solid #e3eaf5;
+  text-align: left;
+  white-space: nowrap;
+}
+
+th {
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+td {
+  color: #172033;
+  font-weight: 600;
+}
+
+tbody tr:hover {
+  background: #f8fafc;
+}
+
+.empty-state {
+  margin: 20px 0 0;
+  color: #64748b;
+  font-weight: 600;
+}

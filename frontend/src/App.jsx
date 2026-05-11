@@ -1,6 +1,40 @@
+import { useEffect, useState } from 'react'
 import './App.css'
+import { getWeatherSummary } from './services/api'
 
 function App() {
+  const [summary, setSummary] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [errorMessage, setErrorMessage] = useState('')
+
+  useEffect(() => {
+    async function fetchSummary() {
+      try {
+        const data = await getWeatherSummary()
+        setSummary(data)
+      } catch (error) {
+        console.error(error)
+        setErrorMessage('Não foi possível carregar os dados da API.')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchSummary()
+  }, [])
+
+  const totalCities = summary.length
+  const totalDays = summary.reduce((acc, item) => acc + Number(item.total_days), 0)
+  const highestAverageTemperature = summary.reduce((highest, item) => {
+    const currentTemperature = Number(item.avg_temperature_mean_celsius)
+
+    if (currentTemperature > highest) {
+      return currentTemperature
+    }
+
+    return highest
+  }, 0)
+
   return (
     <main className="app">
       <section className="hero">
@@ -13,34 +47,67 @@ function App() {
         </div>
       </section>
 
+      {errorMessage && (
+        <section className="alert">
+          <p>{errorMessage}</p>
+        </section>
+      )}
+
       <section className="dashboard-grid">
         <article className="card">
           <span className="card-label">Cidades monitoradas</span>
-          <strong>6</strong>
+          <strong>{isLoading ? '...' : totalCities}</strong>
           <p>Regiões brasileiras disponíveis para análise.</p>
         </article>
 
         <article className="card">
-          <span className="card-label">Período carregado</span>
-          <strong>Jan/2025</strong>
-          <p>Dados históricos coletados via Open-Meteo.</p>
+          <span className="card-label">Registros analisados</span>
+          <strong>{isLoading ? '...' : totalDays}</strong>
+          <p>Dias carregados no banco a partir da Open-Meteo.</p>
         </article>
 
         <article className="card">
-          <span className="card-label">Fonte dos dados</span>
-          <strong>Open-Meteo</strong>
-          <p>Pipeline Python com persistência em PostgreSQL.</p>
+          <span className="card-label">Maior temperatura média</span>
+          <strong>
+            {isLoading ? '...' : `${highestAverageTemperature.toFixed(1)}°C`}
+          </strong>
+          <p>Maior média de temperatura entre as cidades.</p>
         </article>
       </section>
 
       <section className="placeholder-section">
         <div className="section-header">
-          <h2>Visualizações</h2>
-          <p>Os gráficos serão conectados à API nas próximas etapas.</p>
+          <h2>Resumo por cidade</h2>
+          <p>Dados agregados consumidos diretamente da API FastAPI.</p>
         </div>
 
-        <div className="placeholder-chart">
-          <p>Área reservada para gráficos comparativos.</p>
+        <div className="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Cidade</th>
+                <th>Dias</th>
+                <th>Temp. média</th>
+                <th>Chuva total</th>
+                <th>Vento médio</th>
+              </tr>
+            </thead>
+            <tbody>
+              {summary.map((item) => (
+                <tr key={item.location_id}>
+                  <td>{item.city}</td>
+                  <td>{item.total_days}</td>
+                  <td>{Number(item.avg_temperature_mean_celsius).toFixed(1)}°C</td>
+                  <td>{Number(item.total_precipitation_mm).toFixed(1)} mm</td>
+                  <td>{Number(item.avg_wind_speed_max_kmh).toFixed(1)} km/h</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {!isLoading && summary.length === 0 && !errorMessage && (
+            <p className="empty-state">Nenhum dado encontrado.</p>
+          )}
         </div>
       </section>
     </main>
