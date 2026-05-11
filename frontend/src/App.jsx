@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import './App.css'
+import DailyTemperatureLineChart from './components/DailyTemperatureLineChart'
 import DailyWeatherTable from './components/DailyWeatherTable'
 import DashboardFilters from './components/DashboardFilters'
 import TemperatureComparisonChart from './components/TemperatureComparisonChart'
@@ -154,6 +155,19 @@ function App() {
           <p className="empty-state">Carregando gráfico...</p>
         ) : (
           <TemperatureComparisonChart data={comparison} />
+        )}
+      </section>
+
+      <section className="placeholder-section">
+        <div className="section-header">
+          <h2>Evolução diária da temperatura</h2>
+          <p>Temperatura média diária conforme os filtros selecionados.</p>
+        </div>
+
+        {isDailyLoading ? (
+          <p className="empty-state">Carregando gráfico diário...</p>
+        ) : (
+          <DailyTemperatureLineChart data={dailyWeather} />
         )}
       </section>
 
