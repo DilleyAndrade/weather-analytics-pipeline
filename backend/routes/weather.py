@@ -84,3 +84,32 @@ def get_daily_weather(
     with engine.connect() as connection:
         result = connection.execute(query, params)
         return [dict(row._mapping) for row in result]
+
+
+@router.get("/summary")
+def get_weather_summary() -> list[dict]:
+    engine = get_database_engine()
+
+    query = text(
+        """
+        SELECT
+            location_id,
+            city,
+            state,
+            country,
+            total_days,
+            start_date,
+            end_date,
+            avg_temperature_mean_celsius,
+            avg_temperature_max_celsius,
+            avg_temperature_min_celsius,
+            total_precipitation_mm,
+            avg_wind_speed_max_kmh
+        FROM vw_weather_summary_by_location
+        ORDER BY city;
+        """
+    )
+
+    with engine.connect() as connection:
+        result = connection.execute(query)
+        return [dict(row._mapping) for row in result]
