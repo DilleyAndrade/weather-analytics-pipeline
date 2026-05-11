@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS fact_weather_daily (
         UNIQUE (location_id, date_id)
 );
 
+
 CREATE INDEX IF NOT EXISTS idx_fact_weather_daily_location_id
     ON fact_weather_daily(location_id);
 
@@ -59,3 +60,89 @@ CREATE INDEX IF NOT EXISTS idx_fact_weather_daily_date_id
 
 CREATE INDEX IF NOT EXISTS idx_dim_date_date
     ON dim_date(date);
+
+
+CREATE OR REPLACE VIEW vw_weather_daily AS
+SELECT
+    f.weather_daily_id,
+    l.location_id,
+    l.city,
+    l.state,
+    l.country,
+    l.latitude,
+    l.longitude,
+    d.date,
+    d.year,
+    d.month,
+    d.day,
+    d.day_of_week,
+    d.day_name,
+    d.month_name,
+    d.quarter,
+    f.temperature_max_celsius,
+    f.temperature_min_celsius,
+    f.temperature_mean_celsius,
+    f.precipitation_sum_mm,
+    f.wind_speed_max_kmh,
+    f.source,
+    f.created_at,
+    f.updated_at
+FROM fact_weather_daily f
+JOIN dim_location l
+    ON f.location_id = l.location_id
+JOIN dim_date d
+    ON f.date_id = d.date_id;
+
+
+CREATE OR REPLACE VIEW vw_weather_summary_by_location AS
+SELECT
+    l.location_id,
+    l.city,
+    l.state,
+    l.country,
+    COUNT(*) AS total_days,
+    MIN(d.date) AS start_date,
+    MAX(d.date) AS end_date,
+    ROUND(AVG(f.temperature_mean_celsius), 2) AS avg_temperature_mean_celsius,
+    ROUND(AVG(f.temperature_max_celsius), 2) AS avg_temperature_max_celsius,
+    ROUND(AVG(f.temperature_min_celsius), 2) AS avg_temperature_min_celsius,
+    ROUND(SUM(f.precipitation_sum_mm), 2) AS total_precipitation_mm,
+    ROUND(AVG(f.wind_speed_max_kmh), 2) AS avg_wind_speed_max_kmh
+FROM fact_weather_daily f
+JOIN dim_location l
+    ON f.location_id = l.location_id
+JOIN dim_date d
+    ON f.date_id = d.date_id
+GROUP BY
+    l.location_id,
+    l.city,
+    l.state,
+    l.country;
+
+
+CREATE OR REPLACE VIEW vw_weather_comparison_by_period AS
+SELECT
+    l.location_id,
+    l.city,
+    l.state,
+    d.year,
+    d.month,
+    d.month_name,
+    COUNT(*) AS total_days,
+    ROUND(AVG(f.temperature_mean_celsius), 2) AS avg_temperature_mean_celsius,
+    ROUND(MAX(f.temperature_max_celsius), 2) AS max_temperature_celsius,
+    ROUND(MIN(f.temperature_min_celsius), 2) AS min_temperature_celsius,
+    ROUND(SUM(f.precipitation_sum_mm), 2) AS total_precipitation_mm,
+    ROUND(AVG(f.wind_speed_max_kmh), 2) AS avg_wind_speed_max_kmh
+FROM fact_weather_daily f
+JOIN dim_location l
+    ON f.location_id = l.location_id
+JOIN dim_date d
+    ON f.date_id = d.date_id
+GROUP BY
+    l.location_id,
+    l.city,
+    l.state,
+    d.year,
+    d.month,
+    d.month_name;
