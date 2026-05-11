@@ -1,3 +1,5 @@
+from datetime import date
+
 from fastapi import APIRouter, Query
 from sqlalchemy import text
 
@@ -36,9 +38,10 @@ def get_locations() -> list[dict]:
 
 @router.get("/daily")
 def get_daily_weather(
-    location_id: int | None = Query(default=None),
-    start_date: str | None = Query(default=None),
-    end_date: str | None = Query(default=None),
+    location_id: int | None = Query(default=None, ge=1),
+    start_date: date | None = Query(default=None),
+    end_date: date | None = Query(default=None),
+    limit: int = Query(default=100, ge=1, le=1000),
 ) -> list[dict]:
     engine = get_database_engine()
 
@@ -61,25 +64,28 @@ def get_daily_weather(
     if conditions:
         where_clause = "WHERE " + " AND ".join(conditions)
 
-    query = text(
-        f"""
-        SELECT
-            weather_daily_id,
-            location_id,
-            city,
-            state,
-            country,
-            date,
-            temperature_max_celsius,
-            temperature_min_celsius,
-            temperature_mean_celsius,
-            precipitation_sum_mm,
-            wind_speed_max_kmh
-        FROM vw_weather_daily
-        {where_clause}
-        ORDER BY date, city;
-        """
-    )
+        query = text(
+            f"""
+            SELECT
+                weather_daily_id,
+                location_id,
+                city,
+                state,
+                country,
+                date,
+                temperature_max_celsius,
+                temperature_min_celsius,
+                temperature_mean_celsius,
+                precipitation_sum_mm,
+                wind_speed_max_kmh
+            FROM vw_weather_daily
+            {where_clause}
+            ORDER BY date, city
+            LIMIT :limit;
+            """
+        )
+
+        params["limit"] = limit
 
     with engine.connect() as connection:
         result = connection.execute(query, params)
@@ -117,8 +123,8 @@ def get_weather_summary() -> list[dict]:
 
 @router.get("/comparison")
 def get_weather_comparison(
-    year: int | None = Query(default=None),
-    month: int | None = Query(default=None),
+    year: int | None = Query(default=None, ge=1900, le=2100),
+    month: int | None = Query(default=None, ge=1, le=12),
 ) -> list[dict]:
     engine = get_database_engine()
 
