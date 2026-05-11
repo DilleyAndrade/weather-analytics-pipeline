@@ -1,17 +1,27 @@
 import { useEffect, useState } from 'react'
 import './App.css'
-import { getWeatherSummary } from './services/api'
+import TemperatureComparisonChart from './components/TemperatureComparisonChart'
+import { getWeatherComparison, getWeatherSummary } from './services/api'
 
 function App() {
   const [summary, setSummary] = useState([])
+  const [comparison, setComparison] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
 
   useEffect(() => {
-    async function fetchSummary() {
+    async function fetchDashboardData() {
       try {
-        const data = await getWeatherSummary()
-        setSummary(data)
+        const [summaryData, comparisonData] = await Promise.all([
+          getWeatherSummary(),
+          getWeatherComparison({
+            year: 2025,
+            month: 1,
+          }),
+        ])
+
+        setSummary(summaryData)
+        setComparison(comparisonData)
       } catch (error) {
         console.error(error)
         setErrorMessage('Não foi possível carregar os dados da API.')
@@ -20,7 +30,7 @@ function App() {
       }
     }
 
-    fetchSummary()
+    fetchDashboardData()
   }, [])
 
   const totalCities = summary.length
@@ -73,6 +83,19 @@ function App() {
           </strong>
           <p>Maior média de temperatura entre as cidades.</p>
         </article>
+      </section>
+
+      <section className="placeholder-section">
+        <div className="section-header">
+          <h2>Temperatura média por cidade</h2>
+          <p>Comparação baseada nos dados agregados de janeiro de 2025.</p>
+        </div>
+
+        {isLoading ? (
+          <p className="empty-state">Carregando gráfico...</p>
+        ) : (
+          <TemperatureComparisonChart data={comparison} />
+        )}
       </section>
 
       <section className="placeholder-section">

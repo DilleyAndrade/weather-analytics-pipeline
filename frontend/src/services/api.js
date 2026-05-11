@@ -9,4 +9,12 @@ export async function getWeatherSummary() {
   return response.data
 }
 
+export async function getWeatherComparison(params = {}) {
+  const response = await api.get('/weather/comparison', {
+    params,
+  })
+
+  return response.data
+}
+
 export default api
