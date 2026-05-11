@@ -161,10 +161,14 @@ function App() {
       <section className="placeholder-section">
         <div className="section-header">
           <h2>Evolução diária da temperatura</h2>
-          <p>Temperatura média diária conforme os filtros selecionados.</p>
+          <p>Selecione uma cidade para visualizar a evolução diária da temperatura média.</p>
         </div>
 
-        {isDailyLoading ? (
+        {!selectedLocationId ? (
+          <p className="empty-state">
+            Escolha uma cidade nos filtros para exibir o gráfico de evolução diária.
+          </p>
+        ) : isDailyLoading ? (
           <p className="empty-state">Carregando gráfico diário...</p>
         ) : (
           <DailyTemperatureLineChart data={dailyWeather} />
