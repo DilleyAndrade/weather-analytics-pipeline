@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from backend.database import test_database_connection
+from backend.routes.weather import router as weather_router
 
 
 app = FastAPI(
@@ -8,6 +9,8 @@ app = FastAPI(
     description="API for querying weather analytics data.",
     version="0.1.0",
 )
+
+app.include_router(weather_router)
 
 
 @app.get("/")
