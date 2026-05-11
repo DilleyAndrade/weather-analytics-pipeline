@@ -290,3 +290,30 @@ tbody tr:hover {
 .secondary-button:hover {
   background: #f8fafc !important;
 }
+
+.status-message {
+  margin-top: 24px;
+  border-radius: 18px;
+  padding: 18px 20px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.status-message-default {
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #64748b;
+}
+
+.status-message-loading {
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.status-message-error {
+  border: 1px solid #fecaca;
+  background: #fff1f2;
+  color: #991b1b;
+}
+

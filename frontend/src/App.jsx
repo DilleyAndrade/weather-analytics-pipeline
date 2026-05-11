@@ -7,6 +7,7 @@ import DashboardFilters from './components/DashboardFilters'
 import FilteredSummaryCards from './components/FilteredSummaryCards'
 import MainSummaryCards from './components/MainSummaryCards'
 import TemperatureComparisonChart from './components/TemperatureComparisonChart'
+import StatusMessage from './components/StatusMessage'
 import {
   getDailyWeather,
   getWeatherComparison,
@@ -165,9 +166,9 @@ function App() {
       </section>
 
       {errorMessage && (
-        <section className="alert">
-          <p>{errorMessage}</p>
-        </section>
+        <StatusMessage type="error">
+          {errorMessage}
+        </StatusMessage>
       )}
 
       <MainSummaryCards
@@ -206,7 +207,9 @@ function App() {
         </div>
 
         {isLoading ? (
-          <p className="empty-state">Carregando gráfico...</p>
+          <StatusMessage type="loading">
+            Carregando gráfico...
+          </StatusMessage>
         ) : (
           <TemperatureComparisonChart data={comparison} />
         )}
@@ -219,11 +222,13 @@ function App() {
         </div>
 
         {!selectedLocationId ? (
-          <p className="empty-state">
+          <StatusMessage>
             Escolha uma cidade nos filtros para exibir o gráfico de evolução diária.
-          </p>
+          </StatusMessage>
         ) : isDailyLoading ? (
-          <p className="empty-state">Carregando gráfico diário...</p>
+          <StatusMessage type="loading">
+            Carregando gráfico diário...
+          </StatusMessage>
         ) : (
           <DailyTemperatureLineChart
             data={dailyWeather}
@@ -239,7 +244,9 @@ function App() {
         </div>
 
         {isDailyLoading ? (
-          <p className="empty-state">Carregando dados diários...</p>
+          <StatusMessage type="loading">
+            Carregando dados diários...
+          </StatusMessage>
         ) : (
           <DailyWeatherTable data={dailyWeather} />
         )}

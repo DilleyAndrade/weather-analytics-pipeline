@@ -1,3 +1,5 @@
+import StatusMessage from './StatusMessage'
+
 function DailyWeatherTable({ data = [] }) {
   return (
     <div className="table-wrapper">
@@ -29,7 +31,9 @@ function DailyWeatherTable({ data = [] }) {
       </table>
 
       {data.length === 0 && (
-        <p className="empty-state">Nenhum dado diário encontrado.</p>
+        <StatusMessage>
+          Nenhum dado diário encontrado.
+        </StatusMessage>
       )}
     </div>
   )

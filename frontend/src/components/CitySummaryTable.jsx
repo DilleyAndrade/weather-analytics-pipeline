@@ -1,3 +1,5 @@
+import StatusMessage from './StatusMessage'
+
 function CitySummaryTable({ summary = [], isLoading, errorMessage }) {
   return (
     <section className="placeholder-section">
@@ -31,7 +33,9 @@ function CitySummaryTable({ summary = [], isLoading, errorMessage }) {
         </table>
 
         {!isLoading && summary.length === 0 && !errorMessage && (
-          <p className="empty-state">Nenhum dado encontrado.</p>
+          <StatusMessage>
+            Nenhum dado encontrado.
+          </StatusMessage>
         )}
       </div>
     </section>
