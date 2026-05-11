@@ -4,6 +4,10 @@ from datetime import datetime
 from ingestion.api.open_meteo_client import fetch_daily_weather
 from ingestion.load.postgres_loader import get_locations, load_weather_data
 from ingestion.transform.weather_transformer import transform_daily_weather_response
+from ingestion.utils.logger import get_logger
+
+
+logger = get_logger(__name__)
 
 
 def validate_date(date_value: str) -> str:
@@ -45,12 +49,15 @@ def parse_arguments() -> argparse.Namespace:
 
 
 def run_pipeline(start_date: str, end_date: str) -> None:
+    logger.info("Starting weather ingestion pipeline.")
+    logger.info("Extraction period: %s to %s", start_date, end_date)
+
     locations_df = get_locations()
 
     total_rows_loaded = 0
 
     for _, location in locations_df.iterrows():
-        print(f"Fetching weather data for {location['city']}...")
+        logger.info("Fetching weather data for %s.", location["city"])
 
         weather_data = fetch_daily_weather(
             latitude=float(location["latitude"]),
@@ -70,10 +77,10 @@ def run_pipeline(start_date: str, end_date: str) -> None:
         rows_loaded = len(weather_df)
         total_rows_loaded += rows_loaded
 
-        print(f"Loaded {rows_loaded} rows for {location['city']}.")
+        logger.info("Loaded %s rows for %s.", rows_loaded, location["city"])
 
-    print("Weather pipeline finished successfully.")
-    print(f"Total rows loaded: {total_rows_loaded}")
+    logger.info("Weather pipeline finished successfully.")
+    logger.info("Total rows loaded: %s", total_rows_loaded)
 
 
 def main() -> None:
