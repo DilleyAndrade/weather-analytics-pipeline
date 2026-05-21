@@ -51,9 +51,24 @@ CREATE TABLE IF NOT EXISTS fact_weather_daily (
         UNIQUE (location_id, date_id)
 );
 
+CREATE TABLE IF NOT EXISTS dashboard_user (
+    user_id SERIAL PRIMARY KEY,
+    username VARCHAR(80) NOT NULL UNIQUE,
+    display_name VARCHAR(120) NOT NULL,
+    role VARCHAR(40) NOT NULL DEFAULT 'user',
+    password_salt VARCHAR(120) NOT NULL,
+    password_hash CHAR(64) NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 
 CREATE INDEX IF NOT EXISTS idx_fact_weather_daily_location_id
     ON fact_weather_daily(location_id);
+
+CREATE INDEX IF NOT EXISTS idx_dashboard_user_username
+    ON dashboard_user(username);
 
 CREATE INDEX IF NOT EXISTS idx_fact_weather_daily_date_id
     ON fact_weather_daily(date_id);

@@ -33,10 +33,17 @@ function DailyTemperatureLineChart({
     <div className="chart-container">
       <ResponsiveContainer width="100%" height={320}>
         <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="date" />
-          <YAxis unit={currentMetric.unit} />
+          <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
+          <XAxis dataKey="date" stroke="var(--text-secondary)" />
+          <YAxis stroke="var(--text-secondary)" unit={currentMetric.unit} />
           <Tooltip
+            contentStyle={{
+              background: 'var(--bg-elevated)',
+              border: '1px solid var(--border-primary)',
+              borderRadius: '14px',
+              boxShadow: 'var(--chart-tooltip-shadow)',
+              color: 'var(--text-primary)',
+            }}
             formatter={(value) => [
               `${Number(value).toFixed(1)}${currentMetric.unit}`,
               currentMetric.label,
@@ -46,9 +53,10 @@ function DailyTemperatureLineChart({
             type="monotone"
             dataKey={metric}
             name={currentMetric.label}
+            stroke="var(--chart-secondary)"
             strokeWidth={3}
-            dot={{ r: 4 }}
-            activeDot={{ r: 6 }}
+            dot={{ fill: 'var(--bg-secondary)', r: 4, strokeWidth: 2 }}
+            activeDot={{ fill: 'var(--chart-secondary)', r: 6 }}
           />
         </LineChart>
       </ResponsiveContainer>

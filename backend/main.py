@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.database import test_database_connection
+from backend.routes.auth import ensure_dashboard_users_table
+from backend.routes.auth import router as auth_router
 from backend.routes.weather import router as weather_router
 
 
@@ -23,6 +25,12 @@ app.add_middleware(
 )
 
 app.include_router(weather_router)
+app.include_router(auth_router)
+
+
+@app.on_event("startup")
+def startup() -> None:
+    ensure_dashboard_users_table()
 
 
 @app.get("/")

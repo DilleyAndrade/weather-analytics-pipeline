@@ -5,17 +5,54 @@ import DailyTemperatureLineChart from './components/DailyTemperatureLineChart'
 import DailyWeatherTable from './components/DailyWeatherTable'
 import DashboardFilters from './components/DashboardFilters'
 import FilteredSummaryCards from './components/FilteredSummaryCards'
+import LoginScreen from './components/LoginScreen'
 import MainSummaryCards from './components/MainSummaryCards'
 import TemperatureComparisonChart from './components/TemperatureComparisonChart'
 import StatusMessage from './components/StatusMessage'
+import ThemeToggle from './components/ThemeToggle'
 import {
   getDailyWeather,
   getWeatherComparison,
   getWeatherLocations,
   getWeatherSummary,
+  loginDashboardUser,
 } from './services/api'
 
+const INITIAL_START_DATE = '2025-01-01'
+const INITIAL_END_DATE = '2025-01-07'
+
+function getLatestDate(items, fieldName) {
+  return items.reduce((latestDate, item) => {
+    const currentDate = item[fieldName]
+
+    if (!currentDate || currentDate <= latestDate) {
+      return latestDate
+    }
+
+    return currentDate
+  }, '')
+}
+
+function formatDate(date) {
+  if (!date) {
+    return 'Indisponível'
+  }
+
+  return new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: 'long',
+    timeZone: 'UTC',
+    year: 'numeric',
+  }).format(new Date(`${date}T00:00:00Z`))
+}
+
 function App() {
+  const [currentUser, setCurrentUser] = useState(() => {
+    const savedUser = localStorage.getItem('dashboard_user')
+
+    return savedUser ? JSON.parse(savedUser) : null
+  })
+
   const [summary, setSummary] = useState([])
   const [comparison, setComparison] = useState([])
   const [locations, setLocations] = useState([])
@@ -23,12 +60,37 @@ function App() {
 
   const [selectedLocationId, setSelectedLocationId] = useState('')
   const [selectedMetric, setSelectedMetric] = useState('temperature_mean_celsius')
-  const [startDate, setStartDate] = useState('2025-01-01')
-  const [endDate, setEndDate] = useState('2025-01-07')
+  const [startDate, setStartDate] = useState(INITIAL_START_DATE)
+  const [endDate, setEndDate] = useState(INITIAL_END_DATE)
 
   const [isLoading, setIsLoading] = useState(true)
   const [isDailyLoading, setIsDailyLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+
+  async function handleLogin(credentials) {
+    try {
+      const loggedUser = await loginDashboardUser(credentials)
+
+      localStorage.setItem('dashboard_user', JSON.stringify(loggedUser))
+      setCurrentUser(loggedUser)
+
+      return {
+        success: true,
+      }
+    } catch (error) {
+      console.error(error)
+
+      return {
+        message: 'Login ou senha incorretos. Verifique os dados e tente novamente.',
+        success: false,
+      }
+    }
+  }
+
+  function handleLogout() {
+    localStorage.removeItem('dashboard_user')
+    setCurrentUser(null)
+  }
 
   async function fetchDailyWeather() {
     try {
@@ -57,15 +119,15 @@ function App() {
   async function clearFilters() {
     setSelectedLocationId('')
     setSelectedMetric('temperature_mean_celsius')
-    setStartDate('2025-01-01')
-    setEndDate('2025-01-07')
+    setStartDate(INITIAL_START_DATE)
+    setEndDate(INITIAL_END_DATE)
 
     try {
       setIsDailyLoading(true)
 
       const data = await getDailyWeather({
-        start_date: '2025-01-01',
-        end_date: '2025-01-07',
+        start_date: INITIAL_START_DATE,
+        end_date: INITIAL_END_DATE,
         limit: 1000,
       })
 
@@ -79,6 +141,10 @@ function App() {
   }
 
   useEffect(() => {
+    if (!currentUser) {
+      return
+    }
+
     async function fetchDashboardData() {
       try {
         const [summaryData, comparisonData, locationsData, dailyData] =
@@ -90,8 +156,8 @@ function App() {
             }),
             getWeatherLocations(),
             getDailyWeather({
-              start_date: startDate,
-              end_date: endDate,
+              start_date: INITIAL_START_DATE,
+              end_date: INITIAL_END_DATE,
               limit: 1000,
             }),
           ])
@@ -109,7 +175,7 @@ function App() {
     }
 
     fetchDashboardData()
-  }, [])
+  }, [currentUser])
 
   const totalCities = summary.length
 
@@ -153,8 +219,38 @@ function App() {
     return maxWind
   }, 0)
 
+  const latestApiUpdateDate = getLatestDate(summary, 'end_date')
+
+  if (!currentUser) {
+    return <LoginScreen onLogin={handleLogin} />
+  }
+
   return (
     <main className="app">
+      <ThemeToggle />
+
+      <section className="dashboard-topbar" aria-label="Status da API">
+        <div>
+          <span className="topbar-label">Última data disponível na API</span>
+          <strong>
+            {isLoading ? 'Carregando...' : formatDate(latestApiUpdateDate)}
+          </strong>
+        </div>
+
+        <span className={`topbar-badge ${errorMessage ? 'topbar-badge-error' : ''}`}>
+          {errorMessage ? 'Falha na conexão' : 'Dados sincronizados'}
+        </span>
+
+        <div className="user-session">
+          <span>
+            {currentUser.name} ({currentUser.role})
+          </span>
+          <button type="button" onClick={handleLogout}>
+            Sair
+          </button>
+        </div>
+      </section>
+
       <section className="hero">
         <div>
           <p className="eyebrow">Weather Analytics Pipeline</p>

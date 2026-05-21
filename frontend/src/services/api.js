@@ -30,4 +30,9 @@ export async function getDailyWeather(params = {}) {
   return response.data
 }
 
+export async function loginDashboardUser(credentials) {
+  const response = await api.post('/auth/login', credentials)
+  return response.data
+}
+
 export default api
